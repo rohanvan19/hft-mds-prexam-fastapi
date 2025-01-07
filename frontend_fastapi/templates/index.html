@@ -4,23 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Items</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+            padding: 8px 15px;
+            background-color: #007bff;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        li a {
+            margin-left: 10px;
+        }
+
+        .action-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-links a {
+            background-color: #28a745;
+        }
+
+        .action-links a.delete {
+            background-color: #dc3545;
+        }
+
+        .action-links a:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
-    <h1>Shopping Items</h1>
-    <a href="/add">Add Item</a>
-    <ul>
-        {% for item in items %}
-        <li>
-            {{ item.name }} - {{ item.amount }}
-            <a href="/update/{{ item.name }}">Update</a>
-            <a href="/delete/{{ item.name }}">Delete</a>
-        </li>
-        {% endfor %}
-    </ul>
-    <!-- {% if flash_message %}
-    <ul>
-        <li class="flash-message">{{ flash_message }}</li>
-    </ul>
-    {% endif %} -->
+
+    <div class="container">
+        <h1>Shopping Items</h1>
+        <a href="/add" style="margin-bottom: 20px; display: block; text-align: center;">Add Item</a>
+        <ul>
+            {% for item in items %}
+            <li>
+                <span>{{ item.name }} - {{ item.amount }}</span>
+                <div class="action-links">
+                    <a href="/update/{{ item.name }}">Update</a>
+                    <a href="/delete/{{ item.name }}" class="delete">Delete</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
 </body>
 </html>
