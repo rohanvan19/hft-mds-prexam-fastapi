@@ -1,70 +1,86 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import requests
+from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+import httpx
 import os
 
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # For flash messages
+# Initialize FastAPI app
+app = FastAPI()
+templates = Jinja2Templates(directory="/workspaces/hft-mds-prexam-fastapi/frontend_fastapi/templates")
 
-# Base URL for the Spring Boot API - hardcoded is bad!
-# SPRING_BOOT_API_URL = "http://localhost:8080/api/shoppingItems"
+#app.secret_key = 'your_secret_key'  # For flash messages
 
-# Read the environment variable
-SPRING_BOOT_API_URL = os.getenv("SPRING_BOOT_API_URL", "http://localhost:8080/api/shoppingItems")  # Default value if not set
+# Base URL for the Spring Boot API
+SPRING_BOOT_API_URL = os.getenv("SPRING_BOOT_API_URL", "http://localhost:8080/api/shoppingItems")
 
 # Home Page: Display all shopping items
-@app.route('/')
-def index():
-    response = requests.get(SPRING_BOOT_API_URL)
-    if response.status_code == 200:
-        items = response.json()
-    else:
-        items = []
-        flash("Unable to fetch items from the API.", "error")
-    return render_template('index.html', items=items)
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(SPRING_BOOT_API_URL)
+        if response.status_code == 200:
+            items = response.json()  # Get the list of items from the API
+            #flash_message = None
+        else:
+            items = []  # If the API fails, show an empty list
+            #flash_message = "Unable to fetch items from the API."
+    except Exception as e:
+        items = []  # If there's an exception, show an empty list
+        #flash_message = f"Failed to connect to the backend: {e}"
+
+    # Render the template with the fetched items and flash message
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "items": items,
+        #"flash_message": flash_message
+    })
 
 # Add a new shopping item
-@app.route('/add', methods=['GET', 'POST'])
-def add_item():
-    if request.method == 'POST':
-        name = request.form['name']
-        amount = request.form['amount']
-        payload = {"name": name, "amount": int(amount)}
+@app.get("/add", response_class=HTMLResponse)
+async def add_item_form(request: Request):
+    return templates.TemplateResponse("add_item.html", {"request": request})
 
-        response = requests.post(SPRING_BOOT_API_URL, json=payload)
-        if response.status_code == 201:
-            flash("Item added successfully!", "success")
-            return redirect(url_for('index'))
-        if response.status_code == 200:
-            flash("Item updated successfully!", "success")
-            return redirect(url_for('index'))
+@app.post("/add")
+async def add_item(name: str = Form(...), amount: int = Form(...)):
+    payload = {"name": name, "amount": amount}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(SPRING_BOOT_API_URL, json=payload)
+        if response.status_code in [200, 201]:
+            return RedirectResponse(url="/", status_code=303)
         else:
-            flash("Failed to add item.", "error")
-    return render_template('add_item.html')
+            raise HTTPException(status_code=500, detail="Failed to add item.")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to connect to the backend.")
 
 # Update an existing shopping item
-@app.route('/update/<string:name>', methods=['GET', 'POST'])
-def update_item(name):
-    if request.method == 'POST':
-        amount = request.form['amount']
-        payload = {"name": name, "amount": int(amount)}
+@app.get("/update/{name}", response_class=HTMLResponse)
+async def update_item_form(request: Request, name: str):
+    return templates.TemplateResponse("update_item.html", {"request": request, "name": name})
 
-        response = requests.put(f"{SPRING_BOOT_API_URL}/{name}", json=payload)
+@app.post("/update/{name}")
+async def update_item(name: str, amount: int = Form(...)):
+    payload = {"name": name, "amount": amount}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.put(f"{SPRING_BOOT_API_URL}/{name}", json=payload)
         if response.status_code == 200:
-            flash("Item updated successfully!", "success")
-            return redirect(url_for('index'))
+            return RedirectResponse(url="/", status_code=303)
         else:
-            flash("Failed to update item.", "error")
-    return render_template('update_item.html', name=name)
+            raise HTTPException(status_code=500, detail="Failed to update item.")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to connect to the backend.")
 
 # Delete a shopping item
-@app.route('/delete/<string:name>')
-def delete_item(name):
-    response = requests.delete(f"{SPRING_BOOT_API_URL}/{name}")
-    if response.status_code == 204:
-        flash("Item deleted successfully!", "success")
-    else:
-        flash("Failed to delete item.", "error")
-    return redirect(url_for('index'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.get("/delete/{name}")
+async def delete_item(name: str):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(f"{SPRING_BOOT_API_URL}/{name}")
+        if response.status_code == 204:
+            return RedirectResponse(url="/", status_code=303)
+        else:
+            raise HTTPException(status_code=500, detail="Failed to delete item.")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to connect to the backend.")
