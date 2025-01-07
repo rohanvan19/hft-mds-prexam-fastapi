@@ -1,6 +1,5 @@
 services:
   frontendflask:
-    # image: maeddes/frontendflask:hft24
     image: rohanvan23/hft-mds-prexam-fastapi:latest
     networks:
       - shopnet
@@ -13,7 +12,6 @@ services:
 
   backendspringboot:
     container_name: backendspringboot
-    # image: maeddes/backendspringboot:hft24
     image: rohanvan23/hft-mds-prexam-fastapi-backend:latest
     networks:
       - shopnet
