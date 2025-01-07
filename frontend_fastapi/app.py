@@ -8,8 +8,6 @@ import os
 app = FastAPI()
 templates = Jinja2Templates(directory="/workspaces/hft-mds-prexam-fastapi/frontend_fastapi/templates")
 
-#app.secret_key = 'your_secret_key'  # For flash messages
-
 # Base URL for the Spring Boot API
 SPRING_BOOT_API_URL = os.getenv("SPRING_BOOT_API_URL", "http://localhost:8080/api/shoppingItems")
 
@@ -24,16 +22,14 @@ async def index(request: Request):
             #flash_message = None
         else:
             items = []  # If the API fails, show an empty list
-            #flash_message = "Unable to fetch items from the API."
+
     except Exception as e:
         items = []  # If there's an exception, show an empty list
-        #flash_message = f"Failed to connect to the backend: {e}"
 
     # Render the template with the fetched items and flash message
     return templates.TemplateResponse("index.html", {
         "request": request,
         "items": items,
-        #"flash_message": flash_message
     })
 
 # Add a new shopping item
