@@ -1,6 +1,6 @@
 # hft-mds-prexam-fastapi
 
-This project is a full-stack web application where we have used **FastAPI** as the frontend framework and **Spring Boot** as the backend framework.
+This project is a full-stack web application where we have used **FastAPI** as the frontend framework and **Spring Boot** as the backend framework. **The frontend application runs on port 8000.**
 
 ## Project Overview
 

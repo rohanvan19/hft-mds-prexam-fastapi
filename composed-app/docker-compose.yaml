@@ -1,10 +1,12 @@
 services:
   frontendflask:
-    image: rohanvan23/hft-mds-prexam-fastapi:latest
+    image: rohanvan23/hft-mds-prexam-fastapi-frontend:latest
+    build:
+      context: ./frontend_fastapi  # Path to the frontend folder
     networks:
       - shopnet
     ports:
-      - "5000:5000"  # Exposes Flask app on port 5000
+      - "8000:8000"  # Exposes Flask app on port 8000
     environment:
       SPRING_BOOT_API_URL: http://backendspringboot:8080/api/shoppingItems
     depends_on:
@@ -12,7 +14,8 @@ services:
 
   backendspringboot:
     container_name: backendspringboot
-    image: rohanvan23/hft-mds-prexam-fastapi-backend:latest
+    # image: maeddes/backendspringboot:hft24
+    image: rohanvan23/hft-mds-prexam-fastapi-backend:latest # Same as maeddes/backendspringboot:hft24, just created my own
     networks:
       - shopnet
     ports:
@@ -34,7 +37,7 @@ services:
       POSTGRES_PASSWORD: yourpassword
       POSTGRES_DB: shoppingdb
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 

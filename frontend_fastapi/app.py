@@ -6,7 +6,7 @@ import os
 
 # Initialize FastAPI app
 app = FastAPI()
-templates = Jinja2Templates(directory="/workspaces/hft-mds-prexam-fastapi/frontend_fastapi/templates")
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), 'templates'))
 
 # Base URL for the Spring Boot API
 SPRING_BOOT_API_URL = os.getenv("SPRING_BOOT_API_URL", "http://localhost:8080/api/shoppingItems")
@@ -19,7 +19,6 @@ async def index(request: Request):
             response = await client.get(SPRING_BOOT_API_URL)
         if response.status_code == 200:
             items = response.json()  # Get the list of items from the API
-            #flash_message = None
         else:
             items = []  # If the API fails, show an empty list
 
